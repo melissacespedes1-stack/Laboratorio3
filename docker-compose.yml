@@ -1,0 +1,40 @@
+name: lab3-spark 
+
+services:
+  # --- NODO 1: MASTER ---
+  spark-master:
+    build: .
+    container_name: spark-master
+    # Usamos spark-class directamente para evitar que el contenedor se apague
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "8080:8080" # UI Web
+      - "7077:7077" # Puerto Spark
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+
+  # --- NODO 2: WORKER ---
+  spark-worker:
+    build: .
+    container_name: spark-worker
+    # Vinculamos al master usando su nombre de servicio
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2G
+      - SPARK_NO_DAEMONIZE=true
+
+  # --- NODO 3: JUPYTER LAB ---
+  jupyter-lab:
+    build: .
+    container_name: jupyter-lab
+    ports:
+      - "8888:8888" # Acceso al notebook
+      - "4040:4040" # Monitor de Jobs
+    volumes:
+      - ./data:/app/data
+      - ./notebooks:/app/notebooks
+    environment:
+      - SPARK_MASTER_URL=spark://spark-master:7077
