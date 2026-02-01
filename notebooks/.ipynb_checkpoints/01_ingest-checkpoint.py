@@ -30,7 +30,7 @@ df_raw = spark.read \
     .option("header", "true") \
     .option("delimiter", ",") \
     .option("inferSchema", "true") \
-    .load("data/SECOP_II_Contratos_Electronicos.csv")
+    .load("/app/data/SECOP_II_Contratos_Electronicos.csv")
 
 # %%
 # ESCRITURA BRONCE (Delta)
